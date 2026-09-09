@@ -1,0 +1,1830 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图书领用管理系统</title>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --primary-light: #dbeafe;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f0f4f8;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --transition: 0.25s ease;
+            --font: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', 'Noto Sans SC', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .app-container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, #1e3a5f 0%, #3b82f6 50%, #60a5fa 100%);
+            color: #fff;
+            padding: 28px 32px;
+            border-radius: var(--radius);
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .app-header::after {
+            content: '';
+            position: absolute;
+            right: -50px;
+            top: -50px;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .app-header::before {
+            content: '';
+            position: absolute;
+            right: 60px;
+            bottom: -80px;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .app-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 1;
+        }
+        .app-header p {
+            font-size: 14px;
+            opacity: 0.85;
+            margin-top: 6px;
+            position: relative;
+            z-index: 1;
+        }
+        .header-stats {
+            display: flex;
+            gap: 24px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+        .header-stat-item {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 10px 18px;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        .header-stat-item .stat-num {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .header-stat-item .stat-label {
+            opacity: 0.85;
+            font-size: 13px;
+        }
+
+        .tab-nav {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            background: var(--card-bg);
+            padding: 8px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            align-items: center;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all var(--transition);
+            font-family: var(--font);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tab-btn:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+        .tab-btn.active {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+        }
+        .tab-btn .badge {
+            background: var(--danger);
+            color: #fff;
+            border-radius: 12px;
+            padding: 1px 8px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .tab-btn.active .badge {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 24px;
+            margin-bottom: 20px;
+            transition: box-shadow var(--transition);
+        }
+        .card:hover {
+            box-shadow: var(--shadow-hover);
+        }
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-title .icon {
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+        .form-group label .required {
+            color: var(--danger);
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-family: var(--font);
+            transition: all var(--transition);
+            background: #fafbfc;
+            color: var(--text);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+            background: #fff;
+        }
+        .form-control:disabled {
+            background: #f1f5f9;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        select.form-control {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 36px;
+        }
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+            font-size: 14px;
+            font-family: 'Consolas', 'Courier New', monospace;
+        }
+        .form-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .form-row .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            font-family: var(--font);
+            transition: all var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+        }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.45);
+        }
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+        .btn-success:hover {
+            background: #059669;
+        }
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+        }
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1.5px solid var(--primary);
+        }
+        .btn-outline:hover {
+            background: var(--primary-light);
+        }
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 13px;
+            border-radius: 6px;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        table th {
+            background: #f8fafc;
+            padding: 12px 14px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+        table td {
+            padding: 11px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+        table tr:hover td {
+            background: #f8fafc;
+        }
+        table tr:last-child td {
+            border-bottom: none;
+        }
+        .qty-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .qty-available {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .qty-low {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .qty-out {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .alert {
+            padding: 12px 18px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 16px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: fadeIn 0.3s ease;
+        }
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fcd34d;
+        }
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        .pagination button {
+            padding: 7px 14px;
+            border: 1px solid var(--border);
+            background: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: var(--font);
+            transition: all var(--transition);
+            color: var(--text);
+        }
+        .pagination button:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .pagination button.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+        .pagination button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .pagination .page-info {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin: 0 8px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+        .empty-state .empty-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+        .empty-state p {
+            font-size: 15px;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-sm);
+            padding: 18px 20px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: all var(--transition);
+            border-left: 4px solid var(--primary);
+        }
+        .stat-card:nth-child(2) {
+            border-left-color: var(--success);
+        }
+        .stat-card:nth-child(3) {
+            border-left-color: var(--warning);
+        }
+        .stat-card:nth-child(4) {
+            border-left-color: var(--danger);
+        }
+        .stat-card .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .stat-card .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .search-box {
+            position: relative;
+        }
+        .search-box .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            pointer-events: none;
+        }
+        .search-box input {
+            padding-left: 38px;
+        }
+
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        .step-item .step-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-secondary);
+            transition: all var(--transition);
+        }
+        .step-item.active .step-circle {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+        }
+        .step-item.done .step-circle {
+            background: var(--success);
+            color: #fff;
+        }
+        .step-item .step-label {
+            font-weight: 500;
+        }
+        .step-item.active .step-label {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .step-arrow {
+            margin: 0 12px;
+            color: #cbd5e1;
+            font-size: 18px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .app-header {
+                padding: 18px 20px;
+            }
+            .app-header h1 {
+                font-size: 22px;
+            }
+            .card {
+                padding: 16px;
+            }
+            .tab-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+                flex: 1;
+                justify-content: center;
+            }
+            .tab-nav {
+                gap: 4px;
+                padding: 6px;
+            }
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            .form-row .form-group {
+                min-width: auto;
+            }
+            .header-stats {
+                gap: 10px;
+            }
+            .header-stat-item {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+            .header-stat-item .stat-num {
+                font-size: 16px;
+            }
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .stat-card .stat-value {
+                font-size: 22px;
+            }
+            .step-arrow {
+                margin: 0 6px;
+                font-size: 14px;
+            }
+            .step-item {
+                font-size: 12px;
+            }
+            .step-item .step-circle {
+                width: 24px;
+                height: 24px;
+                font-size: 12px;
+            }
+        }
+        @media (max-width: 480px) {
+            .stats-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .tab-btn {
+                font-size: 11px;
+                padding: 6px 8px;
+            }
+            .btn {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.show {
+            display: flex;
+        }
+        .modal-box {
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 28px;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+            text-align: center;
+        }
+        .modal-box h3 {
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+        .modal-box p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .modal-box .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .highlight-box {
+            background: #eff6ff;
+            border: 1.5px dashed #93c5fd;
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #1e40af;
+        }
+        .highlight-box code {
+            background: #dbeafe;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="app-header">
+            <h1>📚 图书领用管理系统</h1>
+            <p>单位图书库存管理与领用登记平台</p>
+            <div class="header-stats" id="headerStats">
+                <div class="header-stat-item"><span class="stat-num" id="hTotalBooks">0</span><span class="stat-label">本图书</span></div>
+                <div class="header-stat-item"><span class="stat-num" id="hTotalBoxes">0</span><span class="stat-label">个箱号</span></div>
+                <div class="header-stat-item"><span class="stat-num" id="hAvailable">0</span><span class="stat-label">本可领</span></div>
+                <div class="header-stat-item"><span class="stat-num" id="hBorrowed">0</span><span class="stat-label">本已领</span></div>
+            </div>
+        </div>
+
+        <div class="stats-row" id="statsRow">
+            <div class="stat-card">
+                <div class="stat-value" id="sTotalQty">0</div>
+                <div class="stat-label">总库存数量</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="sUsedQty">0</div>
+                <div class="stat-label">已领用数量</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="sRemainQty">0</div>
+                <div class="stat-label">剩余可领</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="sRecordCount">0</div>
+                <div class="stat-label">领用记录数</div>
+            </div>
+        </div>
+
+        <div class="tab-nav" id="tabNav">
+            <button class="tab-btn active" data-tab="borrow">📤 图书领用</button>
+            <button class="tab-btn" data-tab="manage" style="display:none;">📦 图书管理</button>
+            <button class="tab-btn" data-tab="inventory">📊 库存查询</button>
+            <button class="tab-btn" data-tab="records">📋 领用记录</button>
+            <button class="btn btn-outline btn-sm" id="adminLoginBtn" onclick="showAdminLogin()" style="margin-left:auto;">🔐 管理员登录</button>
+            <button class="btn btn-outline btn-sm" id="adminLogoutBtn" onclick="adminLogout()" style="display:none;margin-left:auto;">🚪 退出管理</button>
+        </div>
+
+        <div id="alertArea"></div>
+
+        <!-- 图书领用标签 -->
+        <div class="tab-content" id="tab-borrow">
+            <div class="card">
+                <div class="card-title"><span class="icon">📤</span> 图书领用登记</div>
+                <div class="step-indicator">
+                    <div class="step-item active" id="step1"><span class="step-circle">1</span><span class="step-label">选择箱号</span></div>
+                    <span class="step-arrow">→</span>
+                    <div class="step-item" id="step2"><span class="step-circle">2</span><span class="step-label">选择书名</span></div>
+                    <span class="step-arrow">→</span>
+                    <div class="step-item" id="step3"><span class="step-circle">3</span><span class="step-label">填写数量</span></div>
+                    <span class="step-arrow">→</span>
+                    <div class="step-item" id="step4"><span class="step-circle">4</span><span class="step-label">确认提交</span></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>箱号 <span class="required">*</span></label>
+                        <select class="form-control" id="borrowBoxNo" onchange="onBoxSelect()">
+                            <option value="">-- 请选择箱号 --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>书名 <span class="required">*</span></label>
+                        <select class="form-control" id="borrowBookName" onchange="onBookSelect()">
+                            <option value="">-- 请先选择箱号 --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>可领用数量</label>
+                        <input type="text" class="form-control" id="borrowAvailable" disabled value="--">
+                    </div>
+                    <div class="form-group">
+                        <label>领用数量 <span class="required">*</span></label>
+                        <input type="number" class="form-control" id="borrowQty" min="1" placeholder="请输入领用数量" oninput="validateQty()">
+                    </div>
+                    <div class="form-group">
+                        <label>领用人 <span class="required">*</span></label>
+                        <input type="text" class="form-control" id="borrowPerson" placeholder="请输入领用人姓名">
+                    </div>
+                </div>
+                <div style="margin-top:12px; display:flex; gap:12px; flex-wrap:wrap;">
+                    <button class="btn btn-primary" onclick="submitBorrow()" id="btnBorrowSubmit">✅ 确认领用</button>
+                    <button class="btn btn-outline" onclick="resetBorrowForm()">🔄 重置表单</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title"><span class="icon">💡</span> 领用说明</div>
+                <p style="font-size:14px;color:var(--text-secondary);">
+                    1. 请先选择<strong>箱号</strong>，系统会自动筛选该箱中<strong>剩余可领</strong>的书籍。<br>
+                    2. 选择<strong>书名</strong>后，查看可领用数量，填写领用数量。<br>
+                    3. 填写<strong>领用人姓名</strong>，点击"确认领用"完成登记。<br>
+                    4. 系统会自动记录领用时间，并实时更新库存。
+                </p>
+            </div>
+        </div>
+
+        <!-- 图书管理标签 -->
+        <div class="tab-content" id="tab-manage" style="display:none;">
+            <div class="card">
+                <div class="card-title"><span class="icon">➕</span> 手动添加图书</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>箱号 <span class="required">*</span></label>
+                        <input type="text" class="form-control" id="addBoxNo" placeholder="如：1号箱">
+                    </div>
+                    <div class="form-group">
+                        <label>书名 <span class="required">*</span></label>
+                        <input type="text" class="form-control" id="addBookName" placeholder="请输入书名">
+                    </div>
+                    <div class="form-group">
+                        <label>数量 <span class="required">*</span></label>
+                        <input type="number" class="form-control" id="addQty" min="1" placeholder="请输入数量">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="addSingleBook()">➕ 添加图书</button>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><span class="icon">📥</span> 批量导入图书数据</div>
+                <div class="highlight-box">
+                    📌 请将Excel表格中的 <strong>箱号、书名、数量</strong> 三列数据复制后粘贴到下方文本框中。<br>
+                    每行一条记录，列之间用 <strong>制表符（Tab）</strong> 或 <strong>逗号</strong> 分隔。<br>
+                    示例：<code>1号箱&nbsp;&nbsp;&nbsp;&nbsp;红楼梦&nbsp;&nbsp;&nbsp;&nbsp;50</code>
+                </div>
+                <div class="form-group">
+                    <label>粘贴数据（箱号 书名 数量）</label>
+                    <textarea class="form-control" id="importText" placeholder="在此粘贴Excel复制的数据...&#10;格式：箱号	书名	数量"></textarea>
+                </div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button class="btn btn-success" onclick="importBooks('append')">📥 追加导入</button>
+                    <button class="btn btn-danger" onclick="confirmClearAndImport()">🗑️ 清空后导入</button>
+                    <button class="btn btn-outline" onclick="loadSampleData()">📋 加载示例数据</button>
+                    <button class="btn btn-outline" onclick="exportData()">💾 导出数据备份</button>
+                </div>
+                <div style="margin-top:12px;">
+                    <button class="btn btn-outline btn-sm" onclick="clearAllData()" style="color:var(--danger);border-color:var(--danger);">⚠️ 清空所有数据</button>
+                </div>
+            </div>
+            <div class="card" style="background:#fefce8;border-left:4px solid #eab308;">
+                <div class="card-title"><span class="icon">🗑️</span> 管理员操作提示</div>
+                <p style="font-size:14px;color:#92400e;">
+                    在「领用记录」标签页中，管理员可以<strong>删除错误的领用记录</strong>，删除后对应书籍的库存数量会自动恢复。请谨慎操作！
+                </p>
+            </div>
+        </div>
+
+        <!-- 库存查询标签 -->
+        <div class="tab-content" id="tab-inventory" style="display:none;">
+            <div class="card">
+                <div class="card-title"><span class="icon">📊</span> 图书库存一览</div>
+                <div class="form-row" style="margin-bottom:16px;">
+                    <div class="form-group search-box" style="flex:2;">
+                        <label>搜索书名或箱号</label>
+                        <input type="text" class="form-control" id="searchInput" placeholder="输入关键词搜索..." oninput="renderInventoryTable(1)">
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>筛选箱号</label>
+                        <select class="form-control" id="filterBoxNo" onchange="renderInventoryTable(1)">
+                            <option value="">全部箱号</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>库存状态</label>
+                        <select class="form-control" id="filterStatus" onchange="renderInventoryTable(1)">
+                            <option value="">全部状态</option>
+                            <option value="available">有库存</option>
+                            <option value="low">库存不足(≤5)</option>
+                            <option value="out">已领完</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-wrapper" id="inventoryTableWrapper"></div>
+                <div class="pagination" id="inventoryPagination"></div>
+            </div>
+        </div>
+
+        <!-- 领用记录标签 -->
+        <div class="tab-content" id="tab-records" style="display:none;">
+            <div class="card">
+                <div class="card-title"><span class="icon">📋</span> 历史领用记录</div>
+                <div class="form-row" style="margin-bottom:16px;">
+                    <div class="form-group search-box" style="flex:2;">
+                        <label>搜索记录（领用人/书名/箱号）</label>
+                        <input type="text" class="form-control" id="recordSearchInput" placeholder="输入关键词搜索..." oninput="renderRecordsTable(1)">
+                    </div>
+                </div>
+                <div class="table-wrapper" id="recordsTableWrapper"></div>
+                <div class="pagination" id="recordsPagination"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 通用确认模态框 -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-box">
+            <h3 id="modalTitle">确认操作</h3>
+            <p id="modalMessage">确定要执行此操作吗？</p>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModal()">取消</button>
+                <button class="btn btn-danger" id="modalConfirmBtn" onclick="modalConfirmAction()">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 管理员登录模态框 -->
+    <div class="modal-overlay" id="adminModalOverlay">
+        <div class="modal-box">
+            <h3>🔐 管理员验证</h3>
+            <p>请输入管理密码以访问图书管理功能</p>
+            <div class="form-group">
+                <input type="password" class="form-control" id="adminPasswordInput" placeholder="请输入密码" onkeydown="if(event.key==='Enter') verifyAdminPassword()">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeAdminModal()">取消</button>
+                <button class="btn btn-primary" onclick="verifyAdminPassword()">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 数据层 ====================
+        var STORAGE_KEY_BOOKS = 'bookInventoryData_v1';
+        var STORAGE_KEY_RECORDS = 'borrowRecordsData_v1';
+        var books = [];
+        var records = [];
+        var nextBookId = 1;
+        var nextRecordId = 1;
+        var modalCallback = null;
+        var currentTab = 'borrow';
+
+        var inventoryPage = 1;
+        var inventoryPageSize = 30;
+        var recordsPage = 1;
+        var recordsPageSize = 20;
+
+        // ==================== 管理员认证 ====================
+        const ADMIN_PASSWORD = 'admin123'; // 请修改此密码
+        const ADMIN_AUTH_KEY = 'bookAdminAuth_v1';
+        const ADMIN_AUTH_EXPIRY_KEY = 'bookAdminAuthExpiry_v1';
+
+        function isAdminAuthenticated() {
+            const authFlag = localStorage.getItem(ADMIN_AUTH_KEY);
+            const expiry = localStorage.getItem(ADMIN_AUTH_EXPIRY_KEY);
+            if (authFlag === 'true' && expiry) {
+                const now = Date.now();
+                if (now < parseInt(expiry)) {
+                    return true;
+                } else {
+                    localStorage.removeItem(ADMIN_AUTH_KEY);
+                    localStorage.removeItem(ADMIN_AUTH_EXPIRY_KEY);
+                }
+            }
+            return false;
+        }
+
+        function showAdminLogin() {
+            document.getElementById('adminModalOverlay').classList.add('show');
+            document.getElementById('adminPasswordInput').value = '';
+            document.getElementById('adminPasswordInput').focus();
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModalOverlay').classList.remove('show');
+        }
+
+        function verifyAdminPassword() {
+            const input = document.getElementById('adminPasswordInput').value;
+            if (input === ADMIN_PASSWORD) {
+                const expiry = Date.now() + 24 * 60 * 60 * 1000;
+                localStorage.setItem(ADMIN_AUTH_KEY, 'true');
+                localStorage.setItem(ADMIN_AUTH_EXPIRY_KEY, expiry.toString());
+                closeAdminModal();
+                updateAdminUI();
+                showAlert('✅ 管理员验证成功，图书管理功能已开放', 'success');
+            } else {
+                showAlert('❌ 密码错误，请重试', 'error');
+                document.getElementById('adminPasswordInput').value = '';
+                document.getElementById('adminPasswordInput').focus();
+            }
+        }
+
+        function adminLogout() {
+            localStorage.removeItem(ADMIN_AUTH_KEY);
+            localStorage.removeItem(ADMIN_AUTH_EXPIRY_KEY);
+            updateAdminUI();
+            if (currentTab === 'manage') {
+                switchTab('borrow');
+            }
+            showAlert('已退出管理员模式', 'info');
+        }
+
+        function updateAdminUI() {
+            const isAuth = isAdminAuthenticated();
+            const manageTab = document.querySelector('.tab-btn[data-tab="manage"]');
+            const loginBtn = document.getElementById('adminLoginBtn');
+            const logoutBtn = document.getElementById('adminLogoutBtn');
+
+            if (manageTab) {
+                manageTab.style.display = isAuth ? 'flex' : 'none';
+            }
+            if (loginBtn) loginBtn.style.display = isAuth ? 'none' : 'inline-flex';
+            if (logoutBtn) logoutBtn.style.display = isAuth ? 'inline-flex' : 'none';
+        }
+
+        // ==================== 初始化 ====================
+        function init() {
+            loadData();
+            updateAllUI();
+            setupTabNavigation();
+            updateAdminUI();
+        }
+
+        function loadData() {
+            try {
+                var savedBooks = localStorage.getItem(STORAGE_KEY_BOOKS);
+                if (savedBooks) {
+                    var parsed = JSON.parse(savedBooks);
+                    books = parsed.books || [];
+                    nextBookId = parsed.nextBookId || 1;
+                    books.forEach(function(b) {
+                        if (b.id >= nextBookId) nextBookId = b.id + 1;
+                    });
+                }
+            } catch (e) {
+                console.error('加载图书数据失败:', e);
+                books = [];
+            }
+            try {
+                var savedRecords = localStorage.getItem(STORAGE_KEY_RECORDS);
+                if (savedRecords) {
+                    var parsedR = JSON.parse(savedRecords);
+                    records = parsedR.records || [];
+                    nextRecordId = parsedR.nextRecordId || 1;
+                    records.forEach(function(r) {
+                        if (r.id >= nextRecordId) nextRecordId = r.id + 1;
+                    });
+                }
+            } catch (e) {
+                console.error('加载记录数据失败:', e);
+                records = [];
+            }
+        }
+
+        function saveData() {
+            try {
+                localStorage.setItem(STORAGE_KEY_BOOKS, JSON.stringify({
+                    books: books,
+                    nextBookId: nextBookId
+                }));
+                localStorage.setItem(STORAGE_KEY_RECORDS, JSON.stringify({
+                    records: records,
+                    nextRecordId: nextRecordId
+                }));
+            } catch (e) {
+                console.error('保存数据失败:', e);
+                showAlert('数据保存失败，请检查浏览器存储空间', 'error');
+            }
+        }
+
+        // ==================== 工具函数 ====================
+        function getRemainQty(book) {
+            return Math.max(0, book.totalQty - book.usedQty);
+        }
+
+        function getTotalQty() {
+            var total = 0;
+            books.forEach(function(b) { total += b.totalQty; });
+            return total;
+        }
+
+        function getUsedQty() {
+            var used = 0;
+            books.forEach(function(b) { used += b.usedQty; });
+            return used;
+        }
+
+        function getRemainTotalQty() {
+            var remain = 0;
+            books.forEach(function(b) { remain += getRemainQty(b); });
+            return remain;
+        }
+
+        function getUniqueBoxes() {
+            var boxes = {};
+            books.forEach(function(b) {
+                if (b.boxNo && b.boxNo.trim()) {
+                    boxes[b.boxNo.trim()] = true;
+                }
+            });
+            return Object.keys(boxes).sort(function(a, b) {
+                return a.localeCompare(b, 'zh-CN', { numeric: true });
+            });
+        }
+
+        function getAvailableBoxes() {
+            var boxes = {};
+            books.forEach(function(b) {
+                if (b.boxNo && b.boxNo.trim() && getRemainQty(b) > 0) {
+                    boxes[b.boxNo.trim()] = true;
+                }
+            });
+            return Object.keys(boxes).sort(function(a, b) {
+                return a.localeCompare(b, 'zh-CN', { numeric: true });
+            });
+        }
+
+        function getBooksByBox(boxNo) {
+            return books.filter(function(b) {
+                return b.boxNo === boxNo && getRemainQty(b) > 0;
+            });
+        }
+
+        function findBook(boxNo, bookName) {
+            for (var i = 0; i < books.length; i++) {
+                if (books[i].boxNo === boxNo && books[i].bookName === bookName) {
+                    return books[i];
+                }
+            }
+            return null;
+        }
+
+        function formatDate(date) {
+            var d = date || new Date();
+            var year = d.getFullYear();
+            var month = ('0' + (d.getMonth() + 1)).slice(-2);
+            var day = ('0' + d.getDate()).slice(-2);
+            var hours = ('0' + d.getHours()).slice(-2);
+            var minutes = ('0' + d.getMinutes()).slice(-2);
+            return year + '年' + month + '月' + day + '日 ' + hours + ':' + minutes;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            var div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ==================== UI更新 ====================
+        function updateAllUI() {
+            updateHeaderStats();
+            updateStatsCards();
+            updateBorrowBoxSelect();
+            updateInventoryFilterBox();
+            renderInventoryTable(inventoryPage);
+            renderRecordsTable(recordsPage);
+            updateTabBadges();
+            updateAdminUI();
+        }
+
+        function updateHeaderStats() {
+            var totalBooks = books.length;
+            var totalBoxes = getUniqueBoxes().length;
+            var available = getRemainTotalQty();
+            var borrowed = getUsedQty();
+            document.getElementById('hTotalBooks').textContent = totalBooks;
+            document.getElementById('hTotalBoxes').textContent = totalBoxes;
+            document.getElementById('hAvailable').textContent = available;
+            document.getElementById('hBorrowed').textContent = borrowed;
+        }
+
+        function updateStatsCards() {
+            document.getElementById('sTotalQty').textContent = getTotalQty();
+            document.getElementById('sUsedQty').textContent = getUsedQty();
+            document.getElementById('sRemainQty').textContent = getRemainTotalQty();
+            document.getElementById('sRecordCount').textContent = records.length;
+        }
+
+        function updateTabBadges() {
+            var recordCount = records.length;
+            var badges = document.querySelectorAll('.tab-btn .badge');
+            badges.forEach(function(b) { b.remove(); });
+            var recordsBtn = document.querySelector('.tab-btn[data-tab="records"]');
+            if (recordsBtn && recordCount > 0) {
+                var badge = document.createElement('span');
+                badge.className = 'badge';
+                badge.textContent = recordCount;
+                recordsBtn.appendChild(badge);
+            }
+        }
+
+        // ==================== Tab导航 ====================
+        function setupTabNavigation() {
+            var tabBtns = document.querySelectorAll('.tab-btn');
+            tabBtns.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var tab = this.getAttribute('data-tab');
+                    switchTab(tab);
+                });
+            });
+        }
+
+        function switchTab(tab) {
+            if (tab === 'manage' && !isAdminAuthenticated()) {
+                showAlert('请先通过管理员验证', 'warning');
+                showAdminLogin();
+                return;
+            }
+            currentTab = tab;
+            var tabBtns = document.querySelectorAll('.tab-btn');
+            tabBtns.forEach(function(btn) {
+                if (btn.getAttribute('data-tab') === tab) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            var tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(function(content) {
+                content.style.display = 'none';
+            });
+            document.getElementById('tab-' + tab).style.display = 'block';
+            if (tab === 'inventory') {
+                renderInventoryTable(inventoryPage);
+            } else if (tab === 'records') {
+                renderRecordsTable(recordsPage);
+            } else if (tab === 'borrow') {
+                updateBorrowBoxSelect();
+            }
+            hideAlert();
+        }
+
+        // ==================== 提示消息 ====================
+        function showAlert(message, type) {
+            var alertArea = document.getElementById('alertArea');
+            var alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-' + type;
+            var icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+            alertDiv.innerHTML = '<span>' + icon + '</span> ' + escapeHtml(message);
+            alertArea.innerHTML = '';
+            alertArea.appendChild(alertDiv);
+            setTimeout(function() {
+                if (alertDiv.parentNode === alertArea) {
+                    alertDiv.style.opacity = '0';
+                    alertDiv.style.transition = 'opacity 0.4s';
+                    setTimeout(function() { alertDiv.remove(); }, 400);
+                }
+            }, 4000);
+        }
+
+        function hideAlert() {
+            document.getElementById('alertArea').innerHTML = '';
+        }
+
+        // ==================== 模态框（通用确认） ====================
+        function showModal(title, message, callback) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalMessage').textContent = message;
+            modalCallback = callback;
+            document.getElementById('modalOverlay').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('show');
+            modalCallback = null;
+        }
+
+        function modalConfirmAction() {
+            if (modalCallback) {
+                modalCallback();
+            }
+            closeModal();
+        }
+
+        // ==================== 图书领用 ====================
+        function updateBorrowBoxSelect() {
+            var select = document.getElementById('borrowBoxNo');
+            var availableBoxes = getAvailableBoxes();
+            var currentVal = select.value;
+            select.innerHTML = '<option value="">-- 请选择箱号 --</option>';
+            availableBoxes.forEach(function(box) {
+                var opt = document.createElement('option');
+                opt.value = box;
+                opt.textContent = box;
+                select.appendChild(opt);
+            });
+            if (currentVal && availableBoxes.indexOf(currentVal) >= 0) {
+                select.value = currentVal;
+                onBoxSelect();
+            } else {
+                resetBorrowForm();
+            }
+        }
+
+        function onBoxSelect() {
+            var boxNo = document.getElementById('borrowBoxNo').value;
+            var bookSelect = document.getElementById('borrowBookName');
+            var availableInput = document.getElementById('borrowAvailable');
+            var qtyInput = document.getElementById('borrowQty');
+
+            bookSelect.innerHTML = '';
+            availableInput.value = '--';
+            qtyInput.value = '';
+
+            document.getElementById('step1').classList.remove('active');
+            document.getElementById('step1').classList.add('done');
+            document.getElementById('step2').classList.add('active');
+            document.getElementById('step3').classList.remove('active');
+            document.getElementById('step4').classList.remove('active');
+
+            if (!boxNo) {
+                bookSelect.innerHTML = '<option value="">-- 请先选择箱号 --</option>';
+                return;
+            }
+            var boxBooks = getBooksByBox(boxNo);
+            if (boxBooks.length === 0) {
+                bookSelect.innerHTML = '<option value="">-- 该箱暂无库存 --</option>';
+                showAlert('该箱号下没有可领用的书籍', 'warning');
+                return;
+            }
+            bookSelect.innerHTML = '<option value="">-- 请选择书名 --</option>';
+            boxBooks.forEach(function(book) {
+                var opt = document.createElement('option');
+                opt.value = book.bookName;
+                opt.textContent = book.bookName + '（可领 ' + getRemainQty(book) + ' 本）';
+                bookSelect.appendChild(opt);
+            });
+        }
+
+        function onBookSelect() {
+            var boxNo = document.getElementById('borrowBoxNo').value;
+            var bookName = document.getElementById('borrowBookName').value;
+            var availableInput = document.getElementById('borrowAvailable');
+            var qtyInput = document.getElementById('borrowQty');
+
+            document.getElementById('step2').classList.remove('active');
+            document.getElementById('step2').classList.add('done');
+            document.getElementById('step3').classList.add('active');
+
+            if (!boxNo || !bookName) {
+                availableInput.value = '--';
+                return;
+            }
+            var book = findBook(boxNo, bookName);
+            if (book) {
+                var remain = getRemainQty(book);
+                availableInput.value = remain + ' 本';
+                qtyInput.max = remain;
+                validateQty();
+            }
+        }
+
+        function validateQty() {
+            var qtyInput = document.getElementById('borrowQty');
+            var availableInput = document.getElementById('borrowAvailable');
+            var qty = parseInt(qtyInput.value);
+            var availableText = availableInput.value;
+            var available = parseInt(availableText);
+            if (!isNaN(qty) && !isNaN(available) && qty > available) {
+                qtyInput.style.borderColor = '#ef4444';
+                document.getElementById('step3').classList.add('active');
+                document.getElementById('step4').classList.remove('active');
+                return false;
+            } else {
+                qtyInput.style.borderColor = '';
+                if (qty > 0) {
+                    document.getElementById('step3').classList.remove('active');
+                    document.getElementById('step3').classList.add('done');
+                    document.getElementById('step4').classList.add('active');
+                }
+                return true;
+            }
+        }
+
+        function resetBorrowForm() {
+            document.getElementById('borrowBoxNo').value = '';
+            document.getElementById('borrowBookName').innerHTML = '<option value="">-- 请先选择箱号 --</option>';
+            document.getElementById('borrowAvailable').value = '--';
+            document.getElementById('borrowQty').value = '';
+            document.getElementById('borrowPerson').value = '';
+            document.getElementById('borrowQty').style.borderColor = '';
+            document.getElementById('step1').classList.add('active');
+            document.getElementById('step1').classList.remove('done');
+            document.getElementById('step2').classList.remove('active', 'done');
+            document.getElementById('step3').classList.remove('active', 'done');
+            document.getElementById('step4').classList.remove('active');
+        }
+
+        function submitBorrow() {
+            var boxNo = document.getElementById('borrowBoxNo').value;
+            var bookName = document.getElementById('borrowBookName').value;
+            var qty = parseInt(document.getElementById('borrowQty').value);
+            var person = document.getElementById('borrowPerson').value.trim();
+
+            if (!boxNo) { showAlert('请选择箱号', 'error'); return; }
+            if (!bookName) { showAlert('请选择书名', 'error'); return; }
+            if (isNaN(qty) || qty <= 0) { showAlert('请输入有效的领用数量', 'error'); return; }
+            if (!person) { showAlert('请输入领用人姓名', 'error'); return; }
+            var book = findBook(boxNo, bookName);
+            if (!book) { showAlert('未找到该图书，请刷新后重试', 'error'); return; }
+            var remain = getRemainQty(book);
+            if (qty > remain) { showAlert('领用数量超过可领数量（可领 ' + remain + ' 本）', 'error'); return; }
+
+            book.usedQty += qty;
+            var record = {
+                id: nextRecordId++,
+                boxNo: boxNo,
+                bookName: bookName,
+                qty: qty,
+                person: person,
+                date: formatDate(new Date())
+            };
+            records.push(record);
+            saveData();
+            updateAllUI();
+            resetBorrowForm();
+            showAlert('✅ 领用成功！' + person + ' 领用《' + bookName + '》' + qty + ' 本', 'success');
+        }
+
+        // ==================== 图书管理 ====================
+        function addSingleBook() {
+            var boxNo = document.getElementById('addBoxNo').value.trim();
+            var bookName = document.getElementById('addBookName').value.trim();
+            var qty = parseInt(document.getElementById('addQty').value);
+
+            if (!boxNo) { showAlert('请输入箱号', 'error'); return; }
+            if (!bookName) { showAlert('请输入书名', 'error'); return; }
+            if (isNaN(qty) || qty <= 0) { showAlert('请输入有效的数量', 'error'); return; }
+
+            var existing = findBook(boxNo, bookName);
+            if (existing) {
+                existing.totalQty += qty;
+                showAlert('已存在该记录，数量已累加', 'success');
+            } else {
+                books.push({
+                    id: nextBookId++,
+                    boxNo: boxNo,
+                    bookName: bookName,
+                    totalQty: qty,
+                    usedQty: 0
+                });
+                showAlert('✅ 图书添加成功', 'success');
+            }
+            saveData();
+            updateAllUI();
+            document.getElementById('addBoxNo').value = '';
+            document.getElementById('addBookName').value = '';
+            document.getElementById('addQty').value = '';
+        }
+
+        function importBooks(mode) {
+            var importText = document.getElementById('importText').value.trim();
+            if (!importText) { showAlert('请先粘贴要导入的数据', 'warning'); return; }
+
+            var lines = importText.split('\n');
+            var importedCount = 0;
+            var skippedCount = 0;
+
+            if (mode === 'clear') {
+                books = [];
+                nextBookId = 1;
+                records = [];
+                nextRecordId = 1;
+            }
+
+            lines.forEach(function(line, index) {
+                line = line.trim();
+                if (!line) return;
+                var parts = line.split(/\t|,|，/);
+                if (parts.length < 3) {
+                    skippedCount++;
+                    return;
+                }
+                var boxNo = parts[0].trim();
+                var bookName = parts[1].trim();
+                var qty = parseInt(parts[2].trim());
+                if (!boxNo || !bookName || isNaN(qty) || qty <= 0) {
+                    skippedCount++;
+                    return;
+                }
+                var existing = findBook(boxNo, bookName);
+                if (existing) {
+                    existing.totalQty += qty;
+                } else {
+                    books.push({
+                        id: nextBookId++,
+                        boxNo: boxNo,
+                        bookName: bookName,
+                        totalQty: qty,
+                        usedQty: 0
+                    });
+                }
+                importedCount++;
+            });
+
+            saveData();
+            updateAllUI();
+            document.getElementById('importText').value = '';
+
+            var msg = '✅ 成功导入 ' + importedCount + ' 条记录';
+            if (skippedCount > 0) msg += '，跳过 ' + skippedCount + ' 条（格式错误）';
+            showAlert(msg, importedCount > 0 ? 'success' : 'error');
+        }
+
+        function confirmClearAndImport() {
+            var importText = document.getElementById('importText').value.trim();
+            if (!importText) { showAlert('请先粘贴要导入的数据', 'warning'); return; }
+            showModal('确认清空后导入', '此操作将清空所有现有图书数据和领用记录，然后导入新数据。确定继续吗？', function() {
+                importBooks('clear');
+                closeModal();
+            });
+        }
+
+        function loadSampleData() {
+            showModal('加载示例数据', '将加载一些示例图书数据（不会覆盖现有数据），确定继续吗？', function() {
+                var samples = [
+                    { boxNo: '1号箱', bookName: '红楼梦', qty: 30 },
+                    { boxNo: '1号箱', bookName: '西游记', qty: 25 },
+                    { boxNo: '1号箱', bookName: '水浒传', qty: 28 },
+                    { boxNo: '2号箱', bookName: '三国演义', qty: 35 },
+                    { boxNo: '2号箱', bookName: '儒林外史', qty: 20 },
+                    { boxNo: '2号箱', bookName: '聊斋志异', qty: 22 },
+                    { boxNo: '3号箱', bookName: '论语译注', qty: 40 },
+                    { boxNo: '3号箱', bookName: '道德经', qty: 45 },
+                    { boxNo: '3号箱', bookName: '孟子译注', qty: 30 },
+                    { boxNo: '4号箱', bookName: '史记', qty: 25 },
+                    { boxNo: '4号箱', bookName: '资治通鉴', qty: 28 },
+                    { boxNo: '5号箱', bookName: '平凡的世界', qty: 50 },
+                    { boxNo: '5号箱', bookName: '白鹿原', qty: 40 },
+                    { boxNo: '6号箱', bookName: '百年孤独', qty: 35 },
+                    { boxNo: '6号箱', bookName: '活着', qty: 60 }
+                ];
+                samples.forEach(function(s) {
+                    var existing = findBook(s.boxNo, s.bookName);
+                    if (existing) {
+                        existing.totalQty += s.qty;
+                    } else {
+                        books.push({
+                            id: nextBookId++,
+                            boxNo: s.boxNo,
+                            bookName: s.bookName,
+                            totalQty: s.qty,
+                            usedQty: 0
+                        });
+                    }
+                });
+                saveData();
+                updateAllUI();
+                showAlert('✅ 示例数据加载成功（' + samples.length + ' 条记录）', 'success');
+                closeModal();
+            });
+        }
+
+        function clearAllData() {
+            showModal('⚠️ 清空所有数据', '此操作将永久删除所有图书数据和领用记录，无法恢复！确定继续吗？', function() {
+                books = [];
+                nextBookId = 1;
+                records = [];
+                nextRecordId = 1;
+                saveData();
+                updateAllUI();
+                showAlert('所有数据已清空', 'success');
+                closeModal();
+            });
+        }
+
+        function exportData() {
+            if (books.length === 0 && records.length === 0) { showAlert('暂无数据可导出', 'warning'); return; }
+            var csvContent = '\uFEFF';
+            csvContent += '箱号,书名,总数量,已领用,剩余\n';
+            books.forEach(function(b) {
+                csvContent += '"' + b.boxNo + '","' + b.bookName + '",' + b.totalQty + ',' + b.usedQty + ',' + getRemainQty(b) + '\n';
+            });
+            csvContent += '\n\n--- 领用记录 ---\n';
+            csvContent += '时间,箱号,书名,领用数量,领用人\n';
+            records.forEach(function(r) {
+                csvContent += '"' + r.date + '","' + r.boxNo + '","' + r.bookName + '",' + r.qty + ',"' + r.person + '"\n';
+            });
+            var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = '图书库存数据_' + new Date().toISOString().slice(0, 10) + '.csv';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showAlert('📥 数据导出成功', 'success');
+        }
+
+        // ==================== 库存查询 ====================
+        function updateInventoryFilterBox() {
+            var select = document.getElementById('filterBoxNo');
+            var allBoxes = getUniqueBoxes();
+            var currentVal = select.value;
+            select.innerHTML = '<option value="">全部箱号</option>';
+            allBoxes.forEach(function(box) {
+                var opt = document.createElement('option');
+                opt.value = box;
+                opt.textContent = box;
+                select.appendChild(opt);
+            });
+            if (currentVal && allBoxes.indexOf(currentVal) >= 0) {
+                select.value = currentVal;
+            }
+        }
+
+        function getFilteredBooks() {
+            var searchText = document.getElementById('searchInput').value.trim().toLowerCase();
+            var filterBox = document.getElementById('filterBoxNo').value;
+            var filterStatus = document.getElementById('filterStatus').value;
+
+            return books.filter(function(b) {
+                if (searchText) {
+                    var matchSearch = b.bookName.toLowerCase().indexOf(searchText) >= 0 || b.boxNo.toLowerCase().indexOf(searchText) >= 0;
+                    if (!matchSearch) return false;
+                }
+                if (filterBox && b.boxNo !== filterBox) return false;
+                if (filterStatus) {
+                    var remain = getRemainQty(b);
+                    if (filterStatus === 'available' && remain === 0) return false;
+                    if (filterStatus === 'low' && remain > 5) return false;
+                    if (filterStatus === 'low' && remain === 0) return false;
+                    if (filterStatus === 'out' && remain > 0) return false;
+                }
+                return true;
+            });
+        }
+
+        function renderInventoryTable(page) {
+            inventoryPage = page || 1;
+            var filtered = getFilteredBooks();
+            var totalPages = Math.max(1, Math.ceil(filtered.length / inventoryPageSize));
+            if (inventoryPage > totalPages) inventoryPage = totalPages;
+
+            var startIdx = (inventoryPage - 1) * inventoryPageSize;
+            var endIdx = Math.min(startIdx + inventoryPageSize, filtered.length);
+            var pageData = filtered.slice(startIdx, endIdx);
+
+            var wrapper = document.getElementById('inventoryTableWrapper');
+            var pagination = document.getElementById('inventoryPagination');
+
+            if (filtered.length === 0) {
+                wrapper.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><p>暂无图书数据，请先在"图书管理"中添加或导入</p></div>';
+                pagination.innerHTML = '';
+                return;
+            }
+
+            var html = '<table><thead><tr>' +
+                '<th>序号</th><th>箱号</th><th>书名</th><th>总数量</th><th>已领用</th><th>剩余可领</th><th>状态</th>' +
+                '</tr></thead><tbody>';
+            pageData.forEach(function(b, idx) {
+                var remain = getRemainQty(b);
+                var statusClass = 'qty-available';
+                var statusText = '有库存';
+                if (remain === 0) {
+                    statusClass = 'qty-out';
+                    statusText = '已领完';
+                } else if (remain <= 5) {
+                    statusClass = 'qty-low';
+                    statusText = '库存不足';
+                }
+                html += '<tr>' +
+                    '<td>' + (startIdx + idx + 1) + '</td>' +
+                    '<td>' + escapeHtml(b.boxNo) + '</td>' +
+                    '<td><strong>' + escapeHtml(b.bookName) + '</strong></td>' +
+                    '<td>' + b.totalQty + '</td>' +
+                    '<td>' + b.usedQty + '</td>' +
+                    '<td>' + remain + '</td>' +
+                    '<td><span class="qty-badge ' + statusClass + '">' + statusText + '</span></td>' +
+                    '</tr>';
+            });
+            html += '</tbody></table>';
+            wrapper.innerHTML = html;
+
+            var pagHtml = '';
+            if (totalPages > 1) {
+                pagHtml += '<button onclick="renderInventoryTable(' + (inventoryPage - 1) + ')" ' + (inventoryPage === 1 ? 'disabled' : '') + '>上一页</button>';
+                for (var i = 1; i <= totalPages; i++) {
+                    if (i === inventoryPage) {
+                        pagHtml += '<button class="active">' + i + '</button>';
+                    } else if (Math.abs(i - inventoryPage) <= 2 || i === 1 || i === totalPages) {
+                        pagHtml += '<button onclick="renderInventoryTable(' + i + ')">' + i + '</button>';
+                    } else if (Math.abs(i - inventoryPage) === 3) {
+                        pagHtml += '<span style="color:#94a3b8;">...</span>';
+                    }
+                }
+                pagHtml += '<button onclick="renderInventoryTable(' + (inventoryPage + 1) + ')" ' + (inventoryPage === totalPages ? 'disabled' : '') + '>下一页</button>';
+            }
+            pagHtml += '<span class="page-info">共 ' + filtered.length + ' 条记录，第 ' + inventoryPage + '/' + totalPages + ' 页</span>';
+            pagination.innerHTML = pagHtml;
+        }
+
+        // ==================== 领用记录（含管理员删除功能） ====================
+        function getFilteredRecords() {
+            var searchText = document.getElementById('recordSearchInput').value.trim().toLowerCase();
+            return records.filter(function(r) {
+                if (!searchText) return true;
+                return r.person.toLowerCase().indexOf(searchText) >= 0 ||
+                    r.bookName.toLowerCase().indexOf(searchText) >= 0 ||
+                    r.boxNo.toLowerCase().indexOf(searchText) >= 0;
+            }).sort(function(a, b) {
+                return b.id - a.id;
+            });
+        }
+
+        function confirmDeleteRecord(recordId) {
+            if (!isAdminAuthenticated()) {
+                showAlert('只有管理员可以删除领用记录', 'error');
+                return;
+            }
+            var record = records.find(function(r) { return r.id === recordId; });
+            if (!record) {
+                showAlert('记录不存在', 'error');
+                return;
+            }
+            showModal('删除领用记录', '确定要删除该条领用记录吗？<br><strong>' + escapeHtml(record.person) + '</strong> 领用《' + escapeHtml(record.bookName) + '》' + record.qty + ' 本，删除后库存将自动恢复。', function() {
+                deleteRecord(recordId);
+                closeModal();
+            });
+        }
+
+        function deleteRecord(recordId) {
+            if (!isAdminAuthenticated()) {
+                showAlert('只有管理员可以删除领用记录', 'error');
+                return;
+            }
+            var recordIndex = records.findIndex(function(r) { return r.id === recordId; });
+            if (recordIndex === -1) {
+                showAlert('记录不存在', 'error');
+                return;
+            }
+            var record = records[recordIndex];
+            // 回退库存
+            var book = findBook(record.boxNo, record.bookName);
+            if (book) {
+                book.usedQty = Math.max(0, book.usedQty - record.qty);
+            }
+            records.splice(recordIndex, 1);
+            saveData();
+            updateAllUI();
+            renderRecordsTable(recordsPage);
+            showAlert('✅ 记录已删除，库存已恢复', 'success');
+        }
+
+        function renderRecordsTable(page) {
+            recordsPage = page || 1;
+            var filtered = getFilteredRecords();
+            var totalPages = Math.max(1, Math.ceil(filtered.length / recordsPageSize));
+            if (recordsPage > totalPages) recordsPage = totalPages;
+
+            var startIdx = (recordsPage - 1) * recordsPageSize;
+            var endIdx = Math.min(startIdx + recordsPageSize, filtered.length);
+            var pageData = filtered.slice(startIdx, endIdx);
+
+            var wrapper = document.getElementById('recordsTableWrapper');
+            var pagination = document.getElementById('recordsPagination');
+            var isAdmin = isAdminAuthenticated();
+
+            if (filtered.length === 0) {
+                wrapper.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>暂无领用记录</p></div>';
+                pagination.innerHTML = '';
+                return;
+            }
+
+            var html = '<table><thead><tr>' +
+                '<th>序号</th><th>领用时间</th><th>箱号</th><th>书名</th><th>领用数量</th><th>领用人</th>';
+            if (isAdmin) {
+                html += '<th>操作</th>';
+            }
+            html += '</tr></thead><tbody>';
+            pageData.forEach(function(r, idx) {
+                html += '<tr>' +
+                    '<td>' + (startIdx + idx + 1) + '</td>' +
+                    '<td>' + escapeHtml(r.date) + '</td>' +
+                    '<td>' + escapeHtml(r.boxNo) + '</td>' +
+                    '<td><strong>' + escapeHtml(r.bookName) + '</strong></td>' +
+                    '<td>' + r.qty + ' 本</td>' +
+                    '<td>' + escapeHtml(r.person) + '</td>';
+                if (isAdmin) {
+                    html += '<td><button class="btn btn-danger btn-sm" onclick="confirmDeleteRecord(' + r.id + ')">🗑️ 删除</button></td>';
+                }
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+            wrapper.innerHTML = html;
+
+            var pagHtml = '';
+            if (totalPages > 1) {
+                pagHtml += '<button onclick="renderRecordsTable(' + (recordsPage - 1) + ')" ' + (recordsPage === 1 ? 'disabled' : '') + '>上一页</button>';
+                for (var i = 1; i <= totalPages; i++) {
+                    if (i === recordsPage) {
+                        pagHtml += '<button class="active">' + i + '</button>';
+                    } else if (Math.abs(i - recordsPage) <= 2 || i === 1 || i === totalPages) {
+                        pagHtml += '<button onclick="renderRecordsTable(' + i + ')">' + i + '</button>';
+                    } else if (Math.abs(i - recordsPage) === 3) {
+                        pagHtml += '<span style="color:#94a3b8;">...</span>';
+                    }
+                }
+                pagHtml += '<button onclick="renderRecordsTable(' + (recordsPage + 1) + ')" ' + (recordsPage === totalPages ? 'disabled' : '') + '>下一页</button>';
+            }
+            pagHtml += '<span class="page-info">共 ' + filtered.length + ' 条记录，第 ' + recordsPage + '/' + totalPages + ' 页</span>';
+            pagination.innerHTML = pagHtml;
+        }
+
+        // ==================== 键盘事件 ====================
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+                closeAdminModal();
+                hideAlert();
+            }
+            if (e.key === 'Enter' && currentTab === 'borrow') {
+                var activeElement = document.activeElement;
+                if (activeElement && activeElement.tagName !== 'BUTTON') {
+                    submitBorrow();
+                }
+            }
+        });
+
+        // ==================== 启动 ====================
+        document.addEventListener('DOMContentLoaded', init);
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            init();
+        }
+    </script>
+</body>
+</html>
